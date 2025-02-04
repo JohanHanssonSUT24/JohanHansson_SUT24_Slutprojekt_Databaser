@@ -32,5 +32,12 @@ public class Methods
         }
         Console.WriteLine();
     }
+    public static void StudentInformation()
+    {
+
+    }
+
+    private static readonly string _connectionString = "Data Source=localhost;Database=SchoolDB;Integrated Security=True;Trust Server Certificate=true;";
+
 
 }

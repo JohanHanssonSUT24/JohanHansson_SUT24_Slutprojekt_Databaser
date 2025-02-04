@@ -33,6 +33,7 @@ public class Menu
                     Methods.Teachers();
                     break;
                 case "2":
+                    Methods.StudentInformation();
                     break;
                 case "3":
                     break;
