@@ -45,6 +45,7 @@ public class Menu
                     Methods.ADOService.ListOfStudents();
                     break;
                 case "6":
+                    Methods.ADOService.DepartmentWages();
                     break;
                 case "7":
                     break;
