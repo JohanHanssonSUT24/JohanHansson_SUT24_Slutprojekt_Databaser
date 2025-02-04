@@ -13,6 +13,10 @@ public partial class Staff
 
     public int? OccupationId { get; set; }
 
+    public int? StartDate { get; set; }
+
+    public decimal? Salary { get; set; }
+
     public virtual ICollection<Class> Classes { get; set; } = new List<Class>();
 
     public virtual ICollection<Grade> Grades { get; set; } = new List<Grade>();
