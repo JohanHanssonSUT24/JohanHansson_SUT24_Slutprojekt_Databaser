@@ -219,6 +219,39 @@ public class Methods
                 }
             }
         }
+        public static void DepartmentWages()
+        {
+            using(SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = @"SELECT Department.DepartmentName, SUM(Staff.Salary) AS TotalSalary
+                                FROM Staff
+                                JOIN Occupation ON Staff.OccupationId = Occupation.OccupationId
+                                JOIN Department ON Occupation.DepartmentId = Department.DepartmentId
+                                GROUP BY Department.DepartmentName";
+                SqlCommand command = new SqlCommand(query, connection);
+
+                try
+                {
+                    using(SqlDataReader reader = command.ExecuteReader())
+                    {
+                        Console.WriteLine("Total wages for each department: ");
+                        while (reader.Read())
+                        {
+                            string departmentName = reader["DepartmentName"].ToString();
+                            decimal totalSalary = Convert.ToDecimal(reader["TotalSalary"]);
+                            Console.WriteLine($"Department: {departmentName} - Total Salary: {totalSalary}");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error! {ex.Message}");
+                }
+                
+            }
+        }
     }
 
 
