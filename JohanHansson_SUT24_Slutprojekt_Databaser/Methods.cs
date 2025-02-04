@@ -82,7 +82,7 @@ public class Methods
             using (SqlConnection connection = new SqlConnection(_connectionString))//ANVÄND TRY CATCH
             {
                 connection.Open();
-                string query = @"SELECT * FROM Staff";
+                string query = @"SELECT StaffName, Occupation, StartDate FROM Staff";
                 SqlCommand command = new SqlCommand(query, connection);
                 try
                 {
@@ -90,23 +90,68 @@ public class Methods
                     {
                         while (reader.Read())
                         {
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                Console.Write(reader[i].ToString().PadRight(20));
-                            }
-                            Console.WriteLine();
+                            string staffName = reader["StaffName"].ToString();
+                            string occupation = reader["Occupation"].ToString();
+                            int startDate = (int)reader["StartDate"];
+                            int employmentTime = DateTime.Now.Year - startDate;
+                            Console.WriteLine($"Staff name: {staffName} - Occupation: {occupation} - Employmentyears: {employmentTime}");
                         }
                         Console.WriteLine();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine($"Error! {ex.Message}");
                 }
+                Console.WriteLine("Do you wish to add a new staff menmber? Y/N");
+                string userInput = Console.ReadLine().ToUpper();
+                if(userInput == "Y".ToUpper())
+                {
+                    AddStaffMember();
+                }
+                else
+                {
+                    Console.WriteLine("Thank you for using our StaffAdmin-database. Until next time");
+                }
+                Console.WriteLine();
+            }
+        }
+        public static void AddStaffMember()
+        {
+            Console.WriteLine("Enter full name: ");
+            string staffName = Console.ReadLine();
+            Console.WriteLine("Enter occupation: ");
+            string occupation = Console.ReadLine();
+            Console.WriteLine("Enter startyear(20XX): ");
+            string startYear = Console.ReadLine();
+            Console.WriteLine("Enter salary: ");
+            decimal salary = decimal.Parse(Console.ReadLine());
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = @"INSERT INTO Staff (StaffName, Occupation, StartDate, Salary)
+                            VALUES (@StaffName, @Occupation, @StartDate, @Salary)";
+
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@StaffName", staffName);
+                command.Parameters.AddWithValue("@Occupation", occupation);
+                command.Parameters.AddWithValue("@StartDate", startYear);
+                command.Parameters.AddWithValue("@Salary", salary);
+                try
+                {
+                    command.ExecuteNonQuery();
+                    Console.WriteLine("New memeber added to the staff.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error! {ex.Message}");
+                }
+
             }
         }
     }
-    
+
 
 
 }

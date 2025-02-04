@@ -107,6 +107,7 @@ public partial class SchoolDbContext : DbContext
             entity.Property(e => e.Occupation)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.Salary).HasColumnType("decimal(8, 2)");
             entity.Property(e => e.StaffName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
