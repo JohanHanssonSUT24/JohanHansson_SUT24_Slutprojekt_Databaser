@@ -36,8 +36,10 @@ public class Menu
                     Methods.StudentInformation();
                     break;
                 case "3":
+                    Methods.AvalibleSubjects();
                     break;
                 case "4":
+                    Methods.ADOService.StaffAdmin();
                     break;
                 case "5":
                     break;
