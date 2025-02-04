@@ -42,6 +42,7 @@ public class Menu
                     Methods.ADOService.StaffAdmin();
                     break;
                 case "5":
+                    Methods.ADOService.ListOfStudents();
                     break;
                 case "6":
                     break;

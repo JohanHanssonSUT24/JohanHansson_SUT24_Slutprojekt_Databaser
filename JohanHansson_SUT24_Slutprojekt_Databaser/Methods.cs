@@ -73,7 +73,7 @@ public class Methods
         }
         Console.WriteLine();
     }
-    internal class ADOService
+    public class ADOService
     {
         private static readonly string _connectionString = "Data Source=localhost;Database=SchoolDB;Integrated Security=True;Trust Server Certificate=true;";
 
@@ -116,6 +116,7 @@ public class Methods
                 Console.WriteLine();
             }
         }
+
         public static void AddStaffMember()
         {
             Console.WriteLine("Enter full name: ");
@@ -123,7 +124,7 @@ public class Methods
             Console.WriteLine("Enter occupation: ");
             string occupation = Console.ReadLine();
             Console.WriteLine("Enter startyear(20XX): ");
-            string startYear = Console.ReadLine();
+            int startYear = int.Parse(Console.ReadLine());
             Console.WriteLine("Enter salary: ");
             decimal salary = decimal.Parse(Console.ReadLine());
 
@@ -148,6 +149,74 @@ public class Methods
                     Console.WriteLine($"Error! {ex.Message}");
                 }
 
+            }
+        }
+        public static void ListOfStudents()
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = @"SELECT StudId, FirstName, LastName FROM Students";
+                SqlCommand command = new SqlCommand(query, connection);
+                try
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        Console.WriteLine("Students: ");
+                        List<int> studentID = new List<int>();
+
+                        while (reader.Read())
+                        {
+                            int studentId = (int)reader["StudId"];
+                            string firstName = reader["FirstName"].ToString();
+                            string lastName = reader["LastName"].ToString();
+                            Console.WriteLine($"Name: {firstName} {lastName}. StudentID: {studentId}");
+                            studentID.Add(studentId);
+                        }
+                        Console.WriteLine("Please enter a studentID:");
+                        int studId = int.Parse(Console.ReadLine());
+                        ADOService.StudentGrades(studId);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error {ex.Message}");
+                }
+            }
+        }
+        public static void StudentGrades(int studentId)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = @"SELECT grades.GradeChar, grades.GradeDate, staff.StaffName, subjects.SubjectName
+                             FROM Grades grades
+                             JOIN Staff staff ON grades.TeacherId = staff.StaffId
+                             JOIN Subjects subjects ON grades.SubjectId = subjects.SubjectId
+                             WHERE grades.StudentId = @StudentId";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@StudentId", studentId);
+                try
+                {
+                    using(SqlDataReader reader = command.ExecuteReader())
+                    {
+                        Console.WriteLine($"All the grades for student: {studentId}");
+                        while (reader.Read())
+                        {
+                            string grade = reader["GradeChar"].ToString();
+                            DateTime gradeDate = Convert.ToDateTime(reader["GradeDate"]);
+                            string teacherName = reader["StaffName"].ToString();
+                            string subjectName = reader["SubjectName"].ToString();
+
+                            Console.WriteLine($"Subject: {subjectName} - Grade: {grade} - Grading teacher: {teacherName} - Date of Grade: {gradeDate}");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error! {ex.Message}");
+                }
             }
         }
     }
