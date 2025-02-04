@@ -21,9 +21,9 @@ public class Menu
             Console.WriteLine("[3] Courses");
             Console.WriteLine("[4] Staff-admin");
             Console.WriteLine("[5] Student-admin");
-            Console.WriteLine("[6] Payroll");
-            Console.WriteLine("[7] VIP-students");
-            Console.WriteLine("[8] Grades");
+            Console.WriteLine("[6] Wages");
+            Console.WriteLine("[7] Classified student information");
+            Console.WriteLine("[8] Add grades");
             Console.WriteLine("[9] EXIT");
             string userInput = Console.ReadLine();
 
