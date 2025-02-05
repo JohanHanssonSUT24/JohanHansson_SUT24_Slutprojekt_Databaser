@@ -46,10 +46,14 @@ public class Menu
                     break;
                 case "6":
                     Methods.ADOService.DepartmentWages();
+                    Console.WriteLine();
+                    Methods.ADOService.AverageWage();
                     break;
                 case "7":
+                    Methods.ADOService.GetStudentInfo();
                     break;
                 case "8":
+                    Methods.ADOService.AddGrades();
                     break;
                 case "9":
                     menuBool = false;

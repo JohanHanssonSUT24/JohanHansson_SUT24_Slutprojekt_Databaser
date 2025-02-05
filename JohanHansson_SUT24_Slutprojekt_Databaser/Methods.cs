@@ -176,6 +176,7 @@ public class Methods
                         Console.WriteLine("Please enter a studentID:");
                         int studId = int.Parse(Console.ReadLine());
                         ADOService.StudentGrades(studId);
+                        
                     }
                 }
                 catch(Exception ex)
@@ -240,7 +241,7 @@ public class Methods
                         {
                             string departmentName = reader["DepartmentName"].ToString();
                             decimal totalSalary = Convert.ToDecimal(reader["TotalSalary"]);
-                            Console.WriteLine($"Department: {departmentName} - Total Salary: {totalSalary}");
+                            Console.WriteLine($"Department: {departmentName} - Total Salary: {totalSalary:C}");
                         }
                         Console.WriteLine();
                     }
@@ -250,6 +251,132 @@ public class Methods
                     Console.WriteLine($"Error! {ex.Message}");
                 }
                 
+            }
+        }
+        public static void AverageWage()
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = @"SELECT department.DepartmentName, AVG(staff.Salary) AS AverageSalary,COUNT(staff.StaffId) AS TotalEmployees
+                                FROM Staff staff
+                                JOIN Occupation occupation ON staff.OccupationId = occupation.OccupationId
+                                JOIN Department department ON occupation.DepartmentId = department.DepartmentId
+                                GROUP BY department.DepartmentName
+                                ORDER BY department.DepartmentName";
+                SqlCommand command = new SqlCommand(query, connection);
+                try
+                {
+                    using(SqlDataReader reader = command.ExecuteReader())
+                    {
+                        Console.WriteLine($"Average salary per Department: ");
+                        while (reader.Read())
+                        {
+                            string departmentName = reader["DepartmentName"].ToString();
+                            decimal averageSalary = Convert.ToDecimal(reader["AverageSalary"]);
+                            int totalEmployees = Convert.ToInt32(reader["TotalEmployees"]);
+
+                            Console.WriteLine($"Department: {departmentName} - Number of Employees in Department: {totalEmployees} - Average salary per employee: {averageSalary:C}");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error! {ex.Message}");
+                }
+            }
+        }
+        public static void GetStudentInfo()
+        {
+            Console.WriteLine("Please enter student ID: ");
+            int studentId = Int32.Parse(Console.ReadLine());
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("GetStudentInfo", connection);
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                command.Parameters.AddWithValue("@StudentId", studentId);
+
+                try
+                {
+                    using(SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string firstName = reader["FirstName"].ToString();
+                            string lastName = reader["LastName"].ToString();
+                            string className = reader["ClassName"].ToString();
+                            string dob = reader["DoB"].ToString();
+
+                            Console.WriteLine($"First name: {firstName}");
+                            Console.WriteLine($"Last name: {lastName}");
+                            Console.WriteLine($"Class: {className}");
+                            Console.WriteLine($"Date of birth: {dob}");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error! {ex.Message}");
+                }
+            }
+        }
+        public static void AddGrades()
+        {
+            Console.WriteLine("Enter student Id: ");
+            int studentId = Int32.Parse(Console.ReadLine());
+
+            Console.WriteLine("Enter subject Id: ");
+            int subjectId = Int32.Parse(Console.ReadLine());
+
+            Console.WriteLine("Enter grade, A-F: ");
+            string grade = Console.ReadLine();
+           
+
+            Console.WriteLine("Enter teacher Id: ");
+            int teacherId = Int32.Parse(Console.ReadLine());
+
+            Console.WriteLine("Enter grade date(YYYY-MM-DD: ");
+            DateTime gradeDate = DateTime.Parse(Console.ReadLine());
+
+            using( SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        SqlCommand command = new SqlCommand(@"INSERT INTO Grades (StudentId, SubjectId, GradeChar, TeacherId, GradeDate)
+                                                            VALUES(@StudentId,@SubjectId,@GradeChar,@TeacherId,@GradeDate)", connection);
+
+                        command.Transaction = transaction;
+                        command.Parameters.AddWithValue("@StudentId", studentId);
+                        command.Parameters.AddWithValue("@SubjectId", subjectId);
+                        command.Parameters.AddWithValue("@GradeChar", grade);
+                        command.Parameters.AddWithValue("@TeacherId", teacherId);
+                        command.Parameters.AddWithValue("@GradeDate", gradeDate);
+
+                        try
+                        {
+                            command.ExecuteNonQuery();
+                            transaction.Commit();
+                            Console.WriteLine("New grade added.");
+                        }
+                        catch(Exception ex)
+                        {
+                            transaction.Rollback();
+                            Console.WriteLine($"Error! {ex.Message}");
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error! {ex.Message}");
+                }
             }
         }
     }

@@ -7,3 +7,4 @@ internal class Program
         Menu.MainMenu();
     }
 }
+//ADD MORE GRADES
