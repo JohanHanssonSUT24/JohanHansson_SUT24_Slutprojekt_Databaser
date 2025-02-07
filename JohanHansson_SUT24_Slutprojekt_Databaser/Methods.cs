@@ -17,6 +17,7 @@ public class Methods
     }
     public static void Teachers()
     {
+        Console.Clear();
         using var context = CreateContext();
 
         var query = context.Staff
@@ -33,9 +34,12 @@ public class Methods
             Console.WriteLine($"Department {staff.DepartmmentName}\nHas {staff.Teacher} Teachers working there.");
         }
         Console.WriteLine();
+        Console.ReadKey();
+        Console.Clear();
     }
     public static void StudentInformation()
     {
+        Console.Clear();
         using var context = CreateContext();
 
         var query = context.Students
@@ -49,14 +53,20 @@ public class Methods
                 student.ClassId
             })
             .ToList();
+        Console.WriteLine("STUDENTS ENROLLED: ");
+        Console.WriteLine();
         foreach (var stud in query)
         {
             Console.WriteLine($"Student name: {stud.FirstName} {stud.LastName} - DoB: {stud.DoB} - Class: {stud.ClassName} - ClassID: {stud.ClassId}");
         }
         Console.WriteLine();
+        Console.WriteLine("Press any key to return to main menu.");
+        Console.ReadKey();
+        Console.Clear();
     }
     public static void AvalibleSubjects()
     {
+        Console.Clear();
         using var context = CreateContext();
 
         var query = context.Subjects
@@ -72,15 +82,20 @@ public class Methods
             Console.WriteLine($"- {sub.SubjectName}");
         }
         Console.WriteLine();
+        Console.WriteLine("Press any key to return to main menu.");
+        Console.ReadKey();
+        Console.Clear();
     }
     public class ADOService
     {
         private static readonly string _connectionString = "Data Source=localhost;Database=SchoolDB;Integrated Security=True;Trust Server Certificate=true;";
-
+        
         public static void StaffAdmin()
         {
+            Console.Clear();
             using (SqlConnection connection = new SqlConnection(_connectionString))//ANVÄND TRY CATCH
             {
+                Console.WriteLine("Staff avalible on campus: \n");
                 connection.Open();
                 string query = @"SELECT StaffName, Occupation, StartDate FROM Staff";
                 SqlCommand command = new SqlCommand(query, connection);
@@ -92,7 +107,7 @@ public class Methods
                         {
                             string staffName = reader["StaffName"].ToString();
                             string occupation = reader["Occupation"].ToString();
-                            int startDate = (int)reader["StartDate"];
+                            int startDate = reader["StartDate"] != DBNull.Value ? Convert.ToInt32(reader["StartDate"]) : 0;
                             int employmentTime = DateTime.Now.Year - startDate;
                             Console.WriteLine($"Staff name: {staffName} - Occupation: {occupation} - Employmentyears: {employmentTime}");
                         }
@@ -114,6 +129,9 @@ public class Methods
                     Console.WriteLine("Thank you for using our StaffAdmin-database. Until next time");
                 }
                 Console.WriteLine();
+                Console.WriteLine("Press any key to return to main menu.");
+                Console.ReadKey();
+                Console.Clear();
             }
         }
 
@@ -153,6 +171,7 @@ public class Methods
         }
         public static void ListOfStudents()
         {
+            Console.Clear();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
@@ -162,7 +181,7 @@ public class Methods
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        Console.WriteLine("Students: ");
+                        Console.WriteLine("All Students enrolled: ");
                         List<int> studentID = new List<int>();
 
                         while (reader.Read())
@@ -173,6 +192,7 @@ public class Methods
                             Console.WriteLine($"Name: {firstName} {lastName}. StudentID: {studentId}");
                             studentID.Add(studentId);
                         }
+                        Console.WriteLine();
                         Console.WriteLine("Please enter a studentID:");
                         int studId = int.Parse(Console.ReadLine());
                         ADOService.StudentGrades(studId);
@@ -212,6 +232,9 @@ public class Methods
                             Console.WriteLine($"Subject: {subjectName} - Grade: {grade} - Grading teacher: {teacherName} - Date of Grade: {gradeDate}");
                         }
                         Console.WriteLine();
+                        Console.WriteLine("Press any key to return to main menu.");
+                        Console.ReadKey();
+                        Console.Clear();
                     }
                 }
                 catch(Exception ex)
