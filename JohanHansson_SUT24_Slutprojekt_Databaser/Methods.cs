@@ -11,39 +11,41 @@ namespace JohanHansson_SUT24_Slutprojekt_Databaser.Models;
 
 public class Methods
 {
+    //Method to create a "temporary" context
     private static SchoolDbContext CreateContext()
     {
         return new SchoolDbContext();
     }
-    public static void Teachers()
+    public static void Teachers()//Method to show all teachers in department
     {
         Console.Clear();
         using var context = CreateContext();
-
+        
         var query = context.Staff
-            .Where(staff => staff.OccupationNavigation.OccupationName == "Teacher")
-            .GroupBy(staff => staff.OccupationNavigation.Department.DepartmentName)
-            .Select(grades => new
+            .Where(staff => staff.OccupationNavigation.OccupationName == "Teacher") //Show only Teachers"
+            .GroupBy(staff => staff.OccupationNavigation.Department.DepartmentName) //Order Teachers by department
+            .Select(group => new
             {
-                DepartmmentName = grades.Key,
-                Teacher = grades.Count()
+                DepartmmentName = group.Key,
+                Teacher = group.Count() //Number of teachers in given department
             })
             .ToList();
-        foreach (var staff in query)
+        foreach (var staff in query)//Print result
         {
             Console.WriteLine($"Department {staff.DepartmmentName}\nHas {staff.Teacher} Teachers working there.");
         }
         Console.WriteLine();
+        Console.WriteLine("Press any key to return to main menu.");
         Console.ReadKey();
         Console.Clear();
     }
-    public static void StudentInformation()
+    public static void StudentInformation()//Method to show all student info
     {
         Console.Clear();
         using var context = CreateContext();
 
         var query = context.Students
-            .Include(student => student.Class)
+            .Include(student => student.Class) //Add classinfo
             .Select(student => new
             {
                 student.FirstName,
@@ -55,7 +57,7 @@ public class Methods
             .ToList();
         Console.WriteLine("STUDENTS ENROLLED: ");
         Console.WriteLine();
-        foreach (var stud in query)
+        foreach (var stud in query) //Print result
         {
             Console.WriteLine($"Student name: {stud.FirstName} {stud.LastName} - DoB: {stud.DoB} - Class: {stud.ClassName} - ClassID: {stud.ClassId}");
         }
@@ -64,46 +66,46 @@ public class Methods
         Console.ReadKey();
         Console.Clear();
     }
-    public static void AvalibleSubjects()
+    public static void AvalibleSubjects() //Method to show all classes avalible
     {
         Console.Clear();
         using var context = CreateContext();
-
         var query = context.Subjects
             .Select(subject => new
             {
                 subject.SubjectName
             })
             .ToList();
-        Console.WriteLine("Here are all avalible subjects this semester:\n");
+        Console.WriteLine("Here are all avalible subjects this semester:\n");//Display all subject names
         foreach (var sub in query)
         {
 
             Console.WriteLine($"- {sub.SubjectName}");
         }
         Console.WriteLine();
-        Console.WriteLine("Press any key to return to main menu.");
+        Console.WriteLine("Press any key to return to main menu."); //End methods with return option to main menu.
         Console.ReadKey();
         Console.Clear();
     }
-    public class ADOService
+    public class ADOService //Class for ADO
     {
+        //Connection string to DB
         private static readonly string _connectionString = "Data Source=localhost;Database=SchoolDB;Integrated Security=True;Trust Server Certificate=true;";
 
-        public static void StaffAdmin()
+        public static void StaffAdmin() //Method to show all staff info
         {
             Console.Clear();
-            using (SqlConnection connection = new SqlConnection(_connectionString))//ANVÄND TRY CATCH
+            using (SqlConnection connection = new SqlConnection(_connectionString))//Connection to DB
             {
                 Console.WriteLine("Staff avalible on campus: \n");
                 connection.Open();
-                string query = @"SELECT StaffName, Occupation, StartDate FROM Staff";
+                string query = @"SELECT StaffName, Occupation, StartDate FROM Staff"; //Query
                 SqlCommand command = new SqlCommand(query, connection);
                 try
                 {
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = command.ExecuteReader())// SqlReader to read the result
                     {
-                        while (reader.Read())
+                        while (reader.Read()) //Read each row in result
                         {
                             string staffName = reader["StaffName"].ToString();
                             string occupation = reader["Occupation"].ToString();
@@ -116,9 +118,9 @@ public class Methods
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error! {ex.Message}");
+                    Console.WriteLine($"Error! {ex.Message}"); //Error message
                 }
-                Console.WriteLine("Do you wish to add a new staff menmber? Y/N");
+                Console.WriteLine("Do you wish to add a new staff menmber? Y/N"); //Adding option to add new teacher. Call on method - AddStaffMember
                 string userInput = Console.ReadLine().ToUpper();
                 if (userInput == "Y".ToUpper())
                 {
@@ -134,8 +136,7 @@ public class Methods
                 Console.Clear();
             }
         }
-
-        public static void AddStaffMember()
+        public static void AddStaffMember()//Method to add new staff
         {
             Console.WriteLine("Enter full name: ");
             string staffName = Console.ReadLine();
@@ -149,6 +150,7 @@ public class Methods
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
+                //Get OccupationId
                 string occupationId = @"SELECT OccupationId FROM Occupation WHERE OccupationName = @Occupation";
 
                 SqlCommand occupationIdCommand = new SqlCommand(occupationId, connection);
@@ -174,8 +176,6 @@ public class Methods
                     Console.WriteLine($"Error! {ex.Message}");
                     return;
                 }
-
-
                 string query = @"INSERT INTO Staff (StaffName, Occupation, StartDate, Salary, OccupationId)
                             VALUES (@StaffName, @Occupation, @StartDate, @Salary, @OccupationId)";
 
@@ -187,29 +187,28 @@ public class Methods
                 command.Parameters.AddWithValue("@OccupationId", occupationIdValue);
                 try
                 {
-                    command.ExecuteNonQuery();
+                    command.ExecuteNonQuery(); //Execute INSERT to add new member to staff
                     Console.WriteLine("New memeber added to the staff.");
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
-
             }
         }
-        public static void ListOfStudents()
+        public static void ListOfStudents() //Method to list all students
         {
             Console.Clear();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                string query = @"SELECT StudId, FirstName, LastName FROM Students";
+                string query = @"SELECT StudId, FirstName, LastName FROM Students";//Query
                 SqlCommand command = new SqlCommand(query, connection);
                 try
                 {
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = command.ExecuteReader())//Execute query and show result
                     {
-                        Console.WriteLine("All Students enrolled: ");
+                        Console.WriteLine("All Students enrolled: ");//Show all students
                         List<int> studentID = new List<int>();
 
                         while (reader.Read())
@@ -225,11 +224,11 @@ public class Methods
                         bool validNumber = false;
                         while (!validNumber)
                         {
-                            Console.WriteLine("Please enter a studentID:");
+                            Console.WriteLine("Please enter a studentID:");//Choose studentId
                             string userInput = Console.ReadLine();
                             if (int.TryParse(userInput, out studId))
                             {
-                                if (studId > 0 && studentID.Contains(studId))
+                                if (studId > 0 && studentID.Contains(studId))//If statement to verify user input compared to students in DB
                                 {
                                     validNumber = true;
                                 }
@@ -244,8 +243,7 @@ public class Methods
                                 Console.WriteLine();
                             }
                         }
-                        ADOService.StudentGrades(studId);
-
+                        ADOService.StudentGrades(studId);//Show grades for student
                     }
                 }
                 catch (Exception ex)
@@ -254,11 +252,12 @@ public class Methods
                 }
             }
         }
-        public static void StudentGrades(int studentId)
+        public static void StudentGrades(int studentId)//Method to show student grades
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
+                //Query to show subject, grade, grading teacher and grade date
                 string query = @"SELECT grades.GradeChar, grades.GradeDate, staff.StaffName, subjects.SubjectName
                              FROM Grades grades
                              JOIN Staff staff ON grades.TeacherId = staff.StaffId
@@ -293,7 +292,7 @@ public class Methods
                 }
             }
         }
-        public static void DepartmentWages()
+        public static void DepartmentWages()//Method to show sum of wages in each department
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -305,7 +304,6 @@ public class Methods
                                 JOIN Department ON Occupation.DepartmentId = Department.DepartmentId
                                 GROUP BY Department.DepartmentName";
                 SqlCommand command = new SqlCommand(query, connection);
-
                 try
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -324,10 +322,9 @@ public class Methods
                 {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
-
             }
         }
-        public static void AverageWage()
+        public static void AverageWage()//Method for average wage in each department
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -364,8 +361,27 @@ public class Methods
                 Console.Clear();
             }
         }
-        public static void GetStudentInfo()
+        public static void GetStudentInfo()//Method to show certain student information
         {
+            Console.Clear();
+            using var context = CreateContext();
+
+            var query = context.Students
+                .Include(student => student.Class)
+                .Select(student => new
+                {
+                    student.FirstName,
+                    student.LastName,
+                    student.StudId
+                })
+                .ToList();
+            Console.WriteLine("STUDENTS ENROLLED: ");
+            Console.WriteLine();
+            foreach (var stud in query)
+            {
+                Console.WriteLine($"Student name: {stud.FirstName} {stud.LastName} - StudentId: {stud.StudId}");
+            }
+            Console.WriteLine();
             Console.WriteLine("Please enter student ID: ");
             int studentId = Int32.Parse(Console.ReadLine());
 
@@ -374,9 +390,7 @@ public class Methods
                 connection.Open();
                 SqlCommand command = new SqlCommand("GetStudentInfo", connection);
                 command.CommandType = System.Data.CommandType.StoredProcedure;
-
                 command.Parameters.AddWithValue("@StudentId", studentId);
-
                 try
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -387,7 +401,6 @@ public class Methods
                             string lastName = reader["LastName"].ToString();
                             string className = reader["ClassName"].ToString();
                             string dob = reader["DoB"].ToString();
-
                             Console.WriteLine($"First name: {firstName}");
                             Console.WriteLine($"Last name: {lastName}");
                             Console.WriteLine($"Class: {className}");
@@ -400,24 +413,67 @@ public class Methods
                 {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
+                Console.WriteLine("Press any key to return to main menu.");
+                Console.ReadKey();
+                Console.Clear();
             }
         }
         public static void AddGrades()
         {
+            using var context = CreateContext();
+            var query = context.Students
+                .Include(student => student.Class)
+                .Select(student => new
+                {
+                    student.FirstName,
+                    student.LastName,
+                    student.StudId
+                })
+                .ToList();
+            Console.WriteLine();
+            foreach (var stud in query)
+            {
+                Console.WriteLine($"Student name: {stud.FirstName} {stud.LastName} - StudentId: {stud.StudId}");
+            }
             Console.WriteLine("Enter student Id: ");
             int studentId = Int32.Parse(Console.ReadLine());
 
+            using var contextSub = CreateContext();
+            var querySub = context.Subjects
+                
+                .Select(subjects => new
+                {
+                    subjects.SubjectId,
+                    subjects.SubjectName,
+                })
+                .ToList();
+            Console.WriteLine();
+            foreach (var sub in querySub)
+            {
+                Console.WriteLine($"SubjectId: {sub.SubjectId} Subject: {sub.SubjectName}");
+            }
             Console.WriteLine("Enter subject Id: ");
             int subjectId = Int32.Parse(Console.ReadLine());
-
             Console.WriteLine("Enter grade, A-F: ");
             string grade = Console.ReadLine();
 
-
+            using var contextTeach = CreateContext();
+            var queryStaff = context.Staff
+                .Select(staff => new
+                {
+                    staff.StaffName,
+                    staff.StaffId
+                })
+                .ToList();
+            Console.WriteLine();
+            foreach (var staff in queryStaff)
+            {
+                Console.WriteLine($"StaffId: {staff.StaffId} Staff name: {staff.StaffName}");
+            }
             Console.WriteLine("Enter teacher Id: ");
             int teacherId = Int32.Parse(Console.ReadLine());
 
-            Console.WriteLine("Enter grade date(YYYY-MM-DD: ");
+            Console.WriteLine("Enter grade date(YYYY-MM-DD): ");
             DateTime gradeDate = DateTime.Parse(Console.ReadLine());
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -454,10 +510,10 @@ public class Methods
                 {
                     Console.WriteLine($"Error! {ex.Message}");
                 }
+                Console.WriteLine("Press any key to return to main menu.");
+                Console.ReadKey();
+                Console.Clear();
             }
         }
     }
-
-
-
 }

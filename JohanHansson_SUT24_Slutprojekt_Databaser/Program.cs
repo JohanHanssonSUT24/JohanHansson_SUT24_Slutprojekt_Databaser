@@ -4,6 +4,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
+        //Method for menu
         Menu.MainMenu();
     }
 }

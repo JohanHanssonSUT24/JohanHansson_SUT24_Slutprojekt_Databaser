@@ -11,6 +11,7 @@ public class Menu
 {
     public static void MainMenu()
     {
+        //Create menu
         bool menuBool = true;
 
         while (menuBool)
@@ -29,6 +30,7 @@ public class Menu
 
             switch (userInput)
             {
+                //Add methods
                 case "1":
                     Methods.Teachers();
                     break;
